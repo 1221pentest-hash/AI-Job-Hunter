@@ -1,4 +1,4 @@
-title,company,location
-IT Support Technician,Government of Canada,Ottawa
-Desktop Support Technician,Government of Canada,Gatineau
-Help Desk Analyst,Government of Canada,Remote
+title,company,location,url,source
+IT Support Technician,Government of Canada,Ottawa,https://jobs.gc.ca/it-support-technician,Government
+Desktop Support Technician,Government of Canada,Gatineau,https://jobs.gc.ca/desktop-support-technician,Government
+Help Desk Analyst,Government of Canada,Remote,https://jobs.gc.ca/help-desk-analyst,Government

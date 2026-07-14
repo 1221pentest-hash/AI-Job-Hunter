@@ -1,6 +1,9 @@
 from config import APP_NAME, VERSION, AUTHOR
+
 from core.scraper_engine import collect_jobs
+from core.database import initialize_database, save_jobs
 from core.exporter import export_jobs
+
 
 def main():
     print("=" * 50)
@@ -11,14 +14,22 @@ def main():
 
     print("\nStarting AI Job Hunter...\n")
 
+    # Initialize database
+    initialize_database()
+
+    # Collect jobs from all scrapers
     jobs = collect_jobs()
 
-    print(f"\nTotal Jobs Found: {len(jobs)}")
+    # Save new jobs to the database
+    new_jobs = save_jobs(jobs)
 
+    print(f"\nNew jobs saved: {new_jobs}")
+    print(f"Total Jobs Found: {len(jobs)}")
+
+    # Export jobs to CSV
     if jobs:
         print("\nExporting jobs...")
         export_jobs(jobs)
-        print("Jobs exported successfully!")
     else:
         print("\nNo jobs found.")
 
