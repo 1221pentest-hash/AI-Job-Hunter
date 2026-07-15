@@ -46,7 +46,16 @@ CANADA_BONUS = 10
 GOOD_WORD_BONUS = 20
 BAD_WORD_PENALTY = 40
 
-
+TARGET_COMPANIES = [
+    "IBM",
+    "Dell",
+    "CGI",
+    "Bell",
+    "Nokia",
+    "Cisco",
+    "Ciena",
+    "Fortinet",
+]
 GOOD_WORDS = [
     "junior",
     "entry",
@@ -66,3 +75,21 @@ BAD_WORDS = [
     "architect",
     "staff",
 ]
+PRIORITY_LOCATIONS = [
+    "Ottawa",
+    "Gatineau",
+    "Kanata",
+    "Nepean",
+    "Orleans",
+]
+
+SECONDARY_LOCATIONS = [
+    "Montreal",
+    "Laval",
+    "Toronto",
+    "Kingston",
+]
+
+ALLOW_REMOTE = True
+ALLOW_USA_REMOTE = False
+ALLOW_LATAM_REMOTE = False

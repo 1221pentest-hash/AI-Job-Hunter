@@ -1,7 +1,8 @@
 from config import APP_NAME, VERSION, AUTHOR
 
 from core.scraper_engine import collect_jobs
-from core.filters import filter_jobs
+from core.location_filter import filter_locations
+from core.classifier import filter_categories
 from core.scorer import score_jobs
 from core.database import init_db, save_jobs
 from core.exporter import export_jobs
@@ -17,21 +18,45 @@ def main():
 
     print("\nStarting AI Job Hunter...\n")
 
-    # Initialize database
+    # ----------------------------------
+    # Initialize Database
+    # ----------------------------------
+
     init_db()
 
-    # Collect jobs
+    # ----------------------------------
+    # Collect Jobs
+    # ----------------------------------
+
     jobs = collect_jobs()
 
     print(f"\nCollected Jobs: {len(jobs)}")
 
-    # Filter jobs
-    jobs = filter_jobs(jobs)
+    # ----------------------------------
+    # Location Filter
+    # ----------------------------------
 
-    print(f"Jobs After Filtering: {len(jobs)}")
+    jobs = filter_locations(jobs)
 
-    # Score jobs
+    print(f"Jobs After Location Filter: {len(jobs)}")
+
+    # ----------------------------------
+    # Career Classification Filter
+    # ----------------------------------
+
+    jobs = filter_categories(jobs)
+
+    print(f"Jobs After Career Filter: {len(jobs)}")
+
+    # ----------------------------------
+    # Score Jobs
+    # ----------------------------------
+
     jobs = score_jobs(jobs)
+
+    # ----------------------------------
+    # Display Top Matches
+    # ----------------------------------
 
     print("\n==============================")
     print("TOP MATCHES")
@@ -40,12 +65,16 @@ def main():
     for job in jobs[:10]:
 
         print(f"\nScore    : {job.get('score', 0)}")
+        print(f"Category : {job.get('category', 'Unknown')}")
         print(f"Title    : {job.get('title', 'N/A')}")
         print(f"Company  : {job.get('company', 'N/A')}")
         print(f"Location : {job.get('location', 'N/A')}")
         print(f"Source   : {job.get('source', 'N/A')}")
 
-    # Save jobs
+    # ----------------------------------
+    # Save Jobs
+    # ----------------------------------
+
     new_jobs = save_jobs(jobs)
 
     print("\n==============================")
@@ -53,7 +82,10 @@ def main():
     print("==============================")
     print(f"New Jobs Saved : {new_jobs}")
 
+    # ----------------------------------
     # Export CSV
+    # ----------------------------------
+
     if jobs:
 
         print("\nExporting jobs...")

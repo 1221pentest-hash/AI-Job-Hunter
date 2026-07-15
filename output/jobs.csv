@@ -1,22 +1,5 @@
-title,company,location,url,source,score
-IT Support Technician,Government of Canada,Ottawa,https://jobs.gc.ca/it-support-technician,Government,115
-Desktop Support Technician,Government of Canada,Gatineau,https://jobs.gc.ca/desktop-support-technician,Government,115
-Help Desk Analyst,Government of Canada,Remote,https://jobs.gc.ca/help-desk-analyst,Government,110
-Technical Support Engineer Intern (Fall 2026),Cloudflare,In-Office,https://boards.greenhouse.io/cloudflare/jobs/8041135?gh_jid=8041135,Greenhouse,70
-Technical Support Engineer 1,Datadog,"Tokyo, Japan",https://careers.datadoghq.com/detail/7812351/?gh_jid=7812351,Greenhouse,70
-Technical Support Engineer 1,Datadog,"Tokyo, Japan",https://careers.datadoghq.com/detail/7813863/?gh_jid=7813863,Greenhouse,70
-Technical Support Engineer 1,Datadog,"Paris, France",https://careers.datadoghq.com/detail/8007591/?gh_jid=8007591,Greenhouse,70
-Technical Support Engineer 1,Datadog,"Bangalore, India",https://careers.datadoghq.com/detail/7978468/?gh_jid=7978468,Greenhouse,70
-Technical Support Engineer 1 - 2,Datadog,"Seoul, South Korea",https://careers.datadoghq.com/detail/6882229/?gh_jid=6882229,Greenhouse,70
-Technical Support Engineer 1 - 2,Datadog,"Seoul, South Korea",https://careers.datadoghq.com/detail/6883301/?gh_jid=6883301,Greenhouse,70
-Technical Support Engineer 2,Datadog,"Tokyo, Japan",https://careers.datadoghq.com/detail/6759702/?gh_jid=6759702,Greenhouse,70
-Technical Support Engineer 2,Datadog,"Tokyo, Japan",https://careers.datadoghq.com/detail/6761448/?gh_jid=6761448,Greenhouse,70
-Technical Support Engineer 2,Datadog,"Seoul, South Korea",https://careers.datadoghq.com/detail/7477573/?gh_jid=7477573,Greenhouse,70
-Technical Support Engineer 2 (Mexico City),Datadog,"Mexico City, Mexico",https://careers.datadoghq.com/detail/7905764/?gh_jid=7905764,Greenhouse,70
-"Technical Support Engineer 2, Premier - Denver",Datadog,"Denver, Colorado, USA",https://careers.datadoghq.com/detail/7997872/?gh_jid=7997872,Greenhouse,70
-"Technical Support Engineer 2, Premier - EMEA",Datadog,"Dublin, Ireland; Paris, France",https://careers.datadoghq.com/detail/7496253/?gh_jid=7496253,Greenhouse,70
-"Technical Support Engineer 2, Premier - San Francisco",Datadog,"San Francisco, California, USA",https://careers.datadoghq.com/detail/7449072/?gh_jid=7449072,Greenhouse,70
-"Technical Support Engineer 3, Premier - San Francisco",Datadog,"San Francisco, California, USA",https://careers.datadoghq.com/detail/7758574/?gh_jid=7758574,Greenhouse,70
-"Director, Technical Support Engineering",Datadog,"Sao Paulo, Brazil",https://careers.datadoghq.com/detail/7707345/?gh_jid=7707345,Greenhouse,30
-"Manager I, Technical Support Engineering",Datadog,"Tokyo, Japan",https://careers.datadoghq.com/detail/7343626/?gh_jid=7343626,Greenhouse,30
-"Manager I, Technical Support Engineering",Datadog,"Seoul, South Korea",https://careers.datadoghq.com/detail/8014851/?gh_jid=8014851,Greenhouse,30
+title,company,location,url,source,category,score,description,date_posted
+IT Support Technician,Government of Canada,Ottawa,https://jobs.gc.ca/it-support-technician,Government,IT Support,115,,
+Desktop Support Technician,Government of Canada,Gatineau,https://jobs.gc.ca/desktop-support-technician,Government,IT Support,115,,
+Help Desk Analyst,Government of Canada,Remote,https://jobs.gc.ca/help-desk-analyst,Government,IT Support,85,,
+Revenue Technical Analyst,Gitlab,"Remote, Canada; Remote, US",https://job-boards.greenhouse.io/gitlab/jobs/8618795002,Greenhouse,IT Support,25,,
