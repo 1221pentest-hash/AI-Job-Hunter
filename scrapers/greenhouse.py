@@ -1,32 +1,39 @@
 import requests
 
 COMPANIES = [
-    # Enterprise
-    "stripe",
-    "airbnb",
-    "cloudflare",
-    "datadog",
+
+    # AI
     "openai",
+    "anthropic",
 
-    # IT / Security
-    "1password",
-    "crowdstrike",
-    "elastic",
-    "hashicorp",
-    "gitlab",
-
-    # Infrastructure
+    # Cloud
+    "cloudflare",
     "digitalocean",
+
+    # DevOps
+    "gitlab",
+    "hashicorp",
+    "docker",
+    "elastic",
+    "grafana",
+    "snyk",
+
+    # Security
+    "1password",
+
+    # Enterprise
+    "datadog",
     "canonical",
 
     # Canadian
     "shopify",
 
-    # Customer Support
+    # Tech
+    "stripe",
+    "airbnb",
+    "sourcegraph",
     "zapier",
-    "sourcegraph"
 ]
-
 
 def get_jobs():
 

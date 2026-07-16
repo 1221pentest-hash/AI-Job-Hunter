@@ -2,10 +2,14 @@ from config import APP_NAME, VERSION, AUTHOR
 
 from core.scraper_engine import collect_jobs
 from core.location_filter import filter_locations
-from core.classifier import filter_categories
 from core.scorer import score_jobs
 from core.database import init_db, save_jobs
-from core.exporter import export_jobs
+
+from core.exporter import (
+    export_all_jobs,
+    export_canadian_jobs,
+    export_apply_today,
+)
 
 
 def main():
@@ -18,89 +22,125 @@ def main():
 
     print("\nStarting AI Job Hunter...\n")
 
-    # ----------------------------------
+    # ----------------------------------------
     # Initialize Database
-    # ----------------------------------
+    # ----------------------------------------
 
     init_db()
 
-    # ----------------------------------
+    # ----------------------------------------
     # Collect Jobs
-    # ----------------------------------
+    # ----------------------------------------
 
-    jobs = collect_jobs()
+    all_jobs = collect_jobs()
 
-    print(f"\nCollected Jobs: {len(jobs)}")
+    print(f"\nCollected Jobs: {len(all_jobs)}")
 
-    # ----------------------------------
+    # ----------------------------------------
+    # Export All Jobs
+    # ----------------------------------------
+
+    print("\nExporting all collected jobs...")
+
+    export_all_jobs(all_jobs)
+
+    # ----------------------------------------
     # Location Filter
-    # ----------------------------------
+    # ----------------------------------------
 
-    jobs = filter_locations(jobs)
+    canadian_jobs = filter_locations(all_jobs)
 
-    print(f"Jobs After Location Filter: {len(jobs)}")
+    print(f"Jobs After Location Filter: {len(canadian_jobs)}")
 
-    # ----------------------------------
-    # Career Classification Filter
-    # ----------------------------------
+    # ----------------------------------------
+    # Export Canadian Jobs
+    # ----------------------------------------
 
-    jobs = filter_categories(jobs)
+    export_canadian_jobs(canadian_jobs)
 
-    print(f"Jobs After Career Filter: {len(jobs)}")
-
-    # ----------------------------------
+    # ----------------------------------------
     # Score Jobs
-    # ----------------------------------
+    # ----------------------------------------
 
-    jobs = score_jobs(jobs)
+    scored_jobs = score_jobs(canadian_jobs)
 
-    # ----------------------------------
-    # Display Top Matches
-    # ----------------------------------
+    print(f"Jobs Scored: {len(scored_jobs)}")
 
-    print("\n==============================")
-    print("TOP MATCHES")
-    print("==============================")
+    # ----------------------------------------
+    # Keep only relevant jobs
+    # ----------------------------------------
 
-    for job in jobs[:10]:
+    top_jobs = [
+        job
+        for job in scored_jobs
+        if job.get("score", 0) >= 40
+    ]
 
-        print(f"\nScore    : {job.get('score', 0)}")
-        print(f"Category : {job.get('category', 'Unknown')}")
-        print(f"Title    : {job.get('title', 'N/A')}")
-        print(f"Company  : {job.get('company', 'N/A')}")
-        print(f"Location : {job.get('location', 'N/A')}")
-        print(f"Source   : {job.get('source', 'N/A')}")
+    print(f"Top Matches: {len(top_jobs)}")
 
-    # ----------------------------------
-    # Save Jobs
-    # ----------------------------------
+    # ----------------------------------------
+    # Save Database
+    # ----------------------------------------
 
-    new_jobs = save_jobs(jobs)
+    new_jobs = save_jobs(top_jobs)
 
     print("\n==============================")
     print("DATABASE")
     print("==============================")
     print(f"New Jobs Saved : {new_jobs}")
 
-    # ----------------------------------
-    # Export CSV
-    # ----------------------------------
+    # ----------------------------------------
+    # Export Today's Apply List
+    # ----------------------------------------
 
-    if jobs:
+    export_apply_today(top_jobs)
 
-        print("\nExporting jobs...")
+    # ----------------------------------------
+    # Display Results
+    # ----------------------------------------
 
-        export_jobs(jobs)
+    print("\n==============================")
+    print("TODAY'S APPLY LIST")
+    print("==============================")
 
-        print("Jobs exported successfully!")
-
-    else:
+    if not top_jobs:
 
         print("\nNo matching jobs found.")
 
+    else:
+
+        for job in top_jobs[:10]:
+
+            print(f"\nScore    : {job.get('score', 0)}")
+            print(f"Title    : {job.get('title', '')}")
+            print(f"Company  : {job.get('company', '')}")
+            print(f"Location : {job.get('location', '')}")
+            print(f"Source   : {job.get('source', '')}")
+            print(f"URL      : {job.get('url', '')}")
+
+    # ----------------------------------------
+    # Mission Summary
+    # ----------------------------------------
+
     print("\n==============================")
-    print("AI Job Hunter completed successfully.")
+    print("MISSION COMPLETE")
     print("==============================")
+
+    print(f"Jobs Collected      : {len(all_jobs)}")
+    print(f"Canadian Jobs       : {len(canadian_jobs)}")
+    print(f"Jobs Scored         : {len(scored_jobs)}")
+    print(f"Today's Top Jobs    : {len(top_jobs)}")
+
+    print("\nReports Generated")
+
+    print("------------------------------")
+
+    print("✓ output/all_jobs.csv")
+    print("✓ output/canadian_jobs.csv")
+    print("✓ output/apply_today_YYYYMMDD_HHMMSS.csv")
+
+    print("\nObjective:")
+    print("Apply to today's highest-ranked jobs.")
 
 
 if __name__ == "__main__":
