@@ -116,6 +116,76 @@ MISSION COMPLETE
 
 ---
 
+## Screenshots
+
+### Project Structure
+
+![Project Structure](screenshots/01-project-setup.png)
+
+---
+
+### HTTP Connectivity Test
+
+Verifying external API communication using Python Requests.
+
+![HTTP Test](screenshots/02-test-request.png)
+
+---
+
+### JSON API Parsing
+
+Testing JSON responses before integrating live job APIs.
+
+![JSON Test](screenshots/03-test-json.png)
+
+---
+
+### Playwright Installation
+
+Browser automation environment configured successfully.
+
+![Playwright](screenshots/04-playwright-ready.png)
+
+---
+
+### Greenhouse Live Scraper
+
+Collecting live job postings from Greenhouse company boards.
+
+![Greenhouse](screenshots/05-greenhouse-live.png)
+
+---
+
+### Multi-Source Job Collection
+
+Collecting jobs from multiple providers in a single execution.
+
+![Pipeline](screenshots/06-multi-source-pipeline.png)
+
+---
+
+### Successful Application Run
+
+Complete execution of the AI Job Hunter pipeline.
+
+![Successful Run](screenshots/07-successful-run.png)
+
+---
+
+### CSV Export
+
+Exporting collected jobs into CSV format.
+
+![CSV Export](screenshots/08-csv-export.png)
+
+---
+
+### Generated Output
+
+Example of the generated job report.
+
+![Output](screenshots/09-output-csv.png)
+
 ## Author
 
 **Israel Loyo**
