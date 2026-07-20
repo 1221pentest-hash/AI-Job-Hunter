@@ -4,10 +4,18 @@ from typing import Dict, List
 DB_NAME = "data/jobs.db"
 
 
+# --------------------------------------------------
+# Connection
+# --------------------------------------------------
+
 def get_connection():
-    """Create and return a database connection."""
+    """Create and return a SQLite connection."""
     return sqlite3.connect(DB_NAME)
 
+
+# --------------------------------------------------
+# Initialize Database
+# --------------------------------------------------
 
 def init_db():
     """Create the jobs table if it doesn't exist."""
@@ -34,7 +42,15 @@ def init_db():
 
             date_posted TEXT,
 
-            score INTEGER DEFAULT 0,
+            category TEXT,
+
+            score REAL DEFAULT 0,
+
+            resume_match REAL DEFAULT 0,
+
+            matched_skills TEXT,
+
+            missing_skills TEXT,
 
             date_found TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
@@ -44,14 +60,18 @@ def init_db():
     conn.close()
 
 
+# --------------------------------------------------
+# Save One Job
+# --------------------------------------------------
+
 def save_job(job: Dict):
-    """Save a single job. Duplicate URLs are ignored."""
 
     conn = get_connection()
     cursor = conn.cursor()
 
     cursor.execute("""
-        INSERT OR IGNORE INTO jobs (
+        INSERT OR REPLACE INTO jobs (
+
             title,
             company,
             location,
@@ -59,9 +79,14 @@ def save_job(job: Dict):
             source,
             description,
             date_posted,
-            score
+            category,
+            score,
+            resume_match,
+            matched_skills,
+            missing_skills
+
         )
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     """, (
 
         job.get("title", ""),
@@ -71,7 +96,11 @@ def save_job(job: Dict):
         job.get("source", ""),
         job.get("description", ""),
         job.get("date_posted", ""),
-        job.get("score", 0)
+        job.get("category", ""),
+        job.get("score", 0),
+        job.get("resume_match", 0),
+        ", ".join(job.get("matched_skills", [])),
+        ", ".join(job.get("missing_skills", []))
 
     ))
 
@@ -79,8 +108,11 @@ def save_job(job: Dict):
     conn.close()
 
 
+# --------------------------------------------------
+# Save Multiple Jobs
+# --------------------------------------------------
+
 def save_jobs(jobs: List[Dict]):
-    """Save multiple jobs and return the number of new jobs inserted."""
 
     conn = get_connection()
     cursor = conn.cursor()
@@ -90,7 +122,8 @@ def save_jobs(jobs: List[Dict]):
     for job in jobs:
 
         cursor.execute("""
-            INSERT OR IGNORE INTO jobs (
+            INSERT OR REPLACE INTO jobs (
+
                 title,
                 company,
                 location,
@@ -98,9 +131,14 @@ def save_jobs(jobs: List[Dict]):
                 source,
                 description,
                 date_posted,
-                score
+                category,
+                score,
+                resume_match,
+                matched_skills,
+                missing_skills
+
             )
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """, (
 
             job.get("title", ""),
@@ -110,7 +148,11 @@ def save_jobs(jobs: List[Dict]):
             job.get("source", ""),
             job.get("description", ""),
             job.get("date_posted", ""),
-            job.get("score", 0)
+            job.get("category", ""),
+            job.get("score", 0),
+            job.get("resume_match", 0),
+            ", ".join(job.get("matched_skills", [])),
+            ", ".join(job.get("missing_skills", []))
 
         ))
 
@@ -123,8 +165,11 @@ def save_jobs(jobs: List[Dict]):
     return inserted
 
 
+# --------------------------------------------------
+# Queries
+# --------------------------------------------------
+
 def get_all_jobs():
-    """Return all jobs ordered by score."""
 
     conn = get_connection()
     conn.row_factory = sqlite3.Row
@@ -134,7 +179,9 @@ def get_all_jobs():
     cursor.execute("""
         SELECT *
         FROM jobs
-        ORDER BY score DESC, date_found DESC
+        ORDER BY score DESC,
+                 resume_match DESC,
+                 date_found DESC
     """)
 
     jobs = [dict(row) for row in cursor.fetchall()]
@@ -144,13 +191,38 @@ def get_all_jobs():
     return jobs
 
 
-def get_job_count():
-    """Return the total number of jobs."""
+def get_top_jobs(limit=20):
 
     conn = get_connection()
+    conn.row_factory = sqlite3.Row
+
     cursor = conn.cursor()
 
-    cursor.execute("SELECT COUNT(*) FROM jobs")
+    cursor.execute("""
+        SELECT *
+        FROM jobs
+        ORDER BY score DESC,
+                 resume_match DESC
+        LIMIT ?
+    """, (limit,))
+
+    jobs = [dict(row) for row in cursor.fetchall()]
+
+    conn.close()
+
+    return jobs
+
+
+def get_job_count():
+
+    conn = get_connection()
+
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT COUNT(*)
+        FROM jobs
+    """)
 
     count = cursor.fetchone()[0]
 
@@ -160,17 +232,25 @@ def get_job_count():
 
 
 def clear_jobs():
-    """Delete all jobs."""
 
     conn = get_connection()
+
     cursor = conn.cursor()
 
-    cursor.execute("DELETE FROM jobs")
+    cursor.execute("""
+        DELETE FROM jobs
+    """)
 
     conn.commit()
     conn.close()
 
 
+# --------------------------------------------------
+# Test
+# --------------------------------------------------
+
 if __name__ == "__main__":
+
     init_db()
+
     print("Database initialized successfully.")

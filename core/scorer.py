@@ -1,137 +1,213 @@
+"""
+AI Job Hunter
+Job Scoring Engine
+Version 2.0
+"""
+
 from config import (
     PRIORITY_LOCATIONS,
-    TITLE_MATCH_SCORE,
     LOCATION_MATCH_SCORE,
     REMOTE_BONUS,
     CANADA_BONUS,
 )
 
-# ----------------------------------------
-# Positive keywords
-# ----------------------------------------
+from core.rules import (
+    TITLE_RULES,
+    SKILL_RULES,
+    COMPANY_RULES,
+    PENALTY_RULES,
+)
 
-POSITIVE = {
+# ==========================================================
+# CATEGORY BONUS
+# ==========================================================
 
-    "help desk": 40,
-    "service desk": 40,
-
-    "it support": 45,
-    "technical support": 40,
-    "desktop support": 40,
-
-    "support": 20,
-
-    "it technician": 35,
-    "field technician": 35,
-
-    "systems administrator": 45,
-    "system administrator": 45,
-    "administrator": 20,
-
-    "technical analyst": 35,
-    "it analyst": 35,
-    "desktop analyst": 35,
-    "analyst": 10,
-
-    "infrastructure": 25,
-
-    "endpoint": 20,
-
-    "workplace": 15,
-
-    "windows": 15,
-    "active directory": 20,
-    "powershell": 15,
-    "dns": 10,
-    "dhcp": 10,
-    "microsoft 365": 15,
-    "azure": 15,
-    "entra": 15,
-    "intune": 15,
-    "sccm": 15,
-    "vmware": 15,
-    "linux": 10,
-    "docker": 10,
-    "network": 15,
-    "vpn": 10,
+CATEGORY_SCORES = {
+    "IT Support": 30,
+    "System Administration": 25,
+    "Networking": 20,
+    "Cybersecurity": 15,
+    "Cloud / DevOps": 10,
+    "Software Development": -40,
+    "Sales": -100,
+    "Other": -20,
 }
 
-# ----------------------------------------
-# Negative keywords
-# ----------------------------------------
 
-NEGATIVE = {
+# ==========================================================
+# HELPER FUNCTIONS
+# ==========================================================
 
-    "software engineer": -80,
-    "software developer": -80,
+def apply_rules(text, rules, score, reasons, label):
+    """
+    Apply keyword-based scoring rules.
+    """
 
-    "machine learning": -80,
-    "ai engineer": -80,
+    for keyword, value in rules.items():
 
-    "backend": -60,
-    "frontend": -60,
-    "full stack": -60,
+        if keyword in text:
+            score += value
+            reasons.append(f"{value:+} {label}: {keyword}")
 
-    "data scientist": -70,
+    return score
 
-    "marketing": -50,
-    "sales": -50,
-    "finance": -40,
 
-    "account executive": -60,
+def apply_location_bonus(location, score, reasons):
+    """
+    Apply bonuses based on job location.
+    """
 
-    "director": -40,
-    "principal": -40,
-    "staff": -30,
-    "senior": -20,
-}
+    for city in PRIORITY_LOCATIONS:
 
+        if city.lower() in location:
+            score += LOCATION_MATCH_SCORE
+            reasons.append(
+                f"{LOCATION_MATCH_SCORE:+} Location: {city}"
+            )
+
+    if "remote" in location:
+        score += REMOTE_BONUS
+        reasons.append(f"{REMOTE_BONUS:+} Remote")
+
+    if "canada" in location:
+        score += CANADA_BONUS
+        reasons.append(f"{CANADA_BONUS:+} Canada")
+
+    return score
+
+
+def apply_resume_match(job, score, reasons):
+    """
+    Add Resume Matcher score.
+    """
+
+    resume_match = job.get("resume_match", 0)
+
+    score += resume_match
+
+    reasons.append(
+        f"+{resume_match} Resume Match ({resume_match}%)"
+    )
+
+    return score
+
+
+# ==========================================================
+# MAIN SCORING ENGINE
+# ==========================================================
 
 def score_jobs(jobs):
+    """
+    Score every job and return the ranked list.
+    """
 
-    scored = []
+    scored_jobs = []
 
     for job in jobs:
 
         score = 0
+        reasons = []
 
         title = job.get("title", "").lower()
         description = job.get("description", "").lower()
+        company = job.get("company", "").lower()
         location = job.get("location", "").lower()
+        category = job.get("category", "Other")
 
         text = f"{title} {description}"
 
-        # Positive scoring
-        for word, value in POSITIVE.items():
+        # ==================================================
+        # CATEGORY
+        # ==================================================
 
-            if word in text:
-                score += value
+        category_score = CATEGORY_SCORES.get(category, 0)
 
-        # Negative scoring
-        for word, value in NEGATIVE.items():
+        score += category_score
 
-            if word in text:
-                score += value
+        reasons.append(
+            f"{category_score:+} Category: {category}"
+        )
 
-        # Preferred locations
-        for city in PRIORITY_LOCATIONS:
+        # ==================================================
+        # TITLE
+        # ==================================================
 
-            if city.lower() in location:
-                score += LOCATION_MATCH_SCORE
+        score = apply_rules(
+            title,
+            TITLE_RULES,
+            score,
+            reasons,
+            "Title",
+        )
 
-        if "remote" in location:
-            score += REMOTE_BONUS
+        # ==================================================
+        # SKILLS
+        # ==================================================
 
-        if "canada" in location:
-            score += CANADA_BONUS
+        score = apply_rules(
+            text,
+            SKILL_RULES,
+            score,
+            reasons,
+            "Skill",
+        )
+
+        # ==================================================
+        # COMPANY
+        # ==================================================
+
+        score = apply_rules(
+            company,
+            COMPANY_RULES,
+            score,
+            reasons,
+            "Company",
+        )
+
+        # ==================================================
+        # PENALTIES
+        # ==================================================
+
+        score = apply_rules(
+            text,
+            PENALTY_RULES,
+            score,
+            reasons,
+            "Penalty",
+        )
+
+        # ==================================================
+        # LOCATION
+        # ==================================================
+
+        score = apply_location_bonus(
+            location,
+            score,
+            reasons,
+        )
+
+        # ==================================================
+        # RESUME MATCH
+        # ==================================================
+
+        score = apply_resume_match(
+            job,
+            score,
+            reasons,
+        )
+
+        # ==================================================
+        # SAVE RESULTS
+        # ==================================================
 
         job["score"] = score
+        job["reasons"] = reasons
 
-        scored.append(job)
+        scored_jobs.append(job)
 
-    scored.sort(
-        key=lambda x: x["score"],
-        reverse=True
+    scored_jobs.sort(
+        key=lambda job: job["score"],
+        reverse=True,
     )
 
-    return scored
+    return scored_jobs
