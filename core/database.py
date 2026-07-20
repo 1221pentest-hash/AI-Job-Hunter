@@ -1,7 +1,8 @@
 import sqlite3
-from typing import Dict, List
+from pathlib import Path
 
-DB_NAME = "data/jobs.db"
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+DB_NAME = PROJECT_ROOT / "data" / "jobs.db"
 
 
 # --------------------------------------------------
