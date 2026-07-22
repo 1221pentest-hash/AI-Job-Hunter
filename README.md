@@ -249,21 +249,33 @@ streamlit run dashboard.py
 
 # 📸 Screenshots
 
-Add screenshots here after publishing.
+## Streamlit Dashboard
 
-```
-screenshots/
-
-terminal.png
-
-dashboard.png
-
-apply_today.png
-
-reports.png
-```
+![AI Job Hunter Dashboard](screenshots/10-streamlit-dashboard.png)
 
 ---
+
+## Daily Apply Report
+
+![Apply Today Report](screenshots/11-apply-today-csv.png)
+
+---
+
+## Multi-Source Job Collection
+
+![Pipeline](screenshots/06-multi-source-pipeline.png)
+
+---
+
+## Successful Application Run
+
+![Successful Run](screenshots/07-successful-run.png)
+
+---
+
+## CSV Export
+
+![CSV Export](screenshots/09-output-csv.png)
 
 # 🛣️ Roadmap
 
