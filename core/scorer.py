@@ -4,6 +4,8 @@ Job Scoring Engine
 Version 2.0
 """
 
+import re
+
 from config import (
     PRIORITY_LOCATIONS,
     LOCATION_MATCH_SCORE,
@@ -40,17 +42,19 @@ CATEGORY_SCORES = {
 
 def apply_rules(text, rules, score, reasons, label):
     """
-    Apply keyword-based scoring rules.
+    Apply keyword-based scoring rules using whole-word matching.
     """
 
     for keyword, value in rules.items():
 
-        if keyword in text:
+        pattern = r"\b" + re.escape(keyword) + r"\b"
+
+        if re.search(pattern, text):
+
             score += value
             reasons.append(f"{value:+} {label}: {keyword}")
 
     return score
-
 
 def apply_location_bonus(location, score, reasons):
     """
@@ -186,7 +190,7 @@ def score_jobs(jobs):
             reasons,
         )
 
-        # ==================================================
+                # ==================================================
         # RESUME MATCH
         # ==================================================
 
@@ -195,6 +199,14 @@ def score_jobs(jobs):
             score,
             reasons,
         )
+
+        # Temporary Debug
+        if job["title"] == "IT Support Technician":
+            print("\n===== SCORE BREAKDOWN =====")
+            for reason in reasons:
+                print(reason)
+            print(f"FINAL SCORE: {score}")
+            print("===========================\n")
 
         # ==================================================
         # SAVE RESULTS

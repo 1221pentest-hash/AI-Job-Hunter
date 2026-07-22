@@ -1,5 +1,6 @@
 import sqlite3
 from pathlib import Path
+from typing import Dict, List
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 DB_NAME = PROJECT_ROOT / "data" / "jobs.db"
@@ -53,9 +54,20 @@ def init_db():
 
             missing_skills TEXT,
 
+            favorite INTEGER DEFAULT 0,
+
             date_found TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     """)
+
+    # Upgrade older databases safely
+    cursor.execute("PRAGMA table_info(jobs)")
+    columns = [row[1] for row in cursor.fetchall()]
+
+    if "favorite" not in columns:
+        cursor.execute(
+            "ALTER TABLE jobs ADD COLUMN favorite INTEGER DEFAULT 0"
+        )
 
     conn.commit()
     conn.close()
@@ -84,10 +96,11 @@ def save_job(job: Dict):
             score,
             resume_match,
             matched_skills,
-            missing_skills
+            missing_skills,
+            favorite
 
         )
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     """, (
 
         job.get("title", ""),
@@ -101,7 +114,8 @@ def save_job(job: Dict):
         job.get("score", 0),
         job.get("resume_match", 0),
         ", ".join(job.get("matched_skills", [])),
-        ", ".join(job.get("missing_skills", []))
+        ", ".join(job.get("missing_skills", [])),
+        job.get("favorite", 0)
 
     ))
 
@@ -136,10 +150,11 @@ def save_jobs(jobs: List[Dict]):
                 score,
                 resume_match,
                 matched_skills,
-                missing_skills
+                missing_skills,
+                favorite
 
             )
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """, (
 
             job.get("title", ""),
@@ -153,7 +168,8 @@ def save_jobs(jobs: List[Dict]):
             job.get("score", 0),
             job.get("resume_match", 0),
             ", ".join(job.get("matched_skills", [])),
-            ", ".join(job.get("missing_skills", []))
+            ", ".join(job.get("missing_skills", [])),
+            job.get("favorite", 0)
 
         ))
 
@@ -180,7 +196,8 @@ def get_all_jobs():
     cursor.execute("""
         SELECT *
         FROM jobs
-        ORDER BY score DESC,
+        ORDER BY favorite DESC,
+                 score DESC,
                  resume_match DESC,
                  date_found DESC
     """)
@@ -202,10 +219,33 @@ def get_top_jobs(limit=20):
     cursor.execute("""
         SELECT *
         FROM jobs
-        ORDER BY score DESC,
+        ORDER BY favorite DESC,
+                 score DESC,
                  resume_match DESC
         LIMIT ?
     """, (limit,))
+
+    jobs = [dict(row) for row in cursor.fetchall()]
+
+    conn.close()
+
+    return jobs
+
+
+def get_favorite_jobs():
+
+    conn = get_connection()
+    conn.row_factory = sqlite3.Row
+
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT *
+        FROM jobs
+        WHERE favorite = 1
+        ORDER BY score DESC,
+                 resume_match DESC
+    """)
 
     jobs = [dict(row) for row in cursor.fetchall()]
 
@@ -230,6 +270,50 @@ def get_job_count():
     conn.close()
 
     return count
+
+
+def is_favorite(job_id):
+
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute(
+        "SELECT favorite FROM jobs WHERE id=?",
+        (job_id,)
+    )
+
+    row = cursor.fetchone()
+
+    conn.close()
+
+    if row:
+        return bool(row[0])
+
+    return False
+
+
+def set_favorite(job_id, value):
+
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    cursor.execute(
+        """
+        UPDATE jobs
+        SET favorite=?
+        WHERE id=?
+        """,
+        (1 if value else 0, job_id)
+    )
+
+    conn.commit()
+    conn.close()
+
+
+def toggle_favorite(job_id):
+
+    current = is_favorite(job_id)
+    set_favorite(job_id, not current)
 
 
 def clear_jobs():

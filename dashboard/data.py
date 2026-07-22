@@ -33,10 +33,6 @@ def get_connection():
 def load_jobs() -> pd.DataFrame:
     """
     Load all jobs from the database.
-
-    Returns
-    -------
-    pandas.DataFrame
     """
 
     conn = get_connection()
@@ -47,9 +43,103 @@ def load_jobs() -> pd.DataFrame:
             """
             SELECT *
             FROM jobs
-            ORDER BY score DESC,
-                     resume_match DESC,
-                     date_found DESC
+            ORDER BY
+                favorite DESC,
+                score DESC,
+                resume_match DESC,
+                date_found DESC
+            """,
+            conn,
+        )
+
+    finally:
+        conn.close()
+
+    return df
+
+
+# --------------------------------------------------
+# Favorites
+# --------------------------------------------------
+
+def set_favorite(job_id: int, value: bool):
+    """
+    Mark or unmark a job as favorite.
+    """
+
+    conn = get_connection()
+
+    cursor = conn.cursor()
+
+    cursor.execute(
+        """
+        UPDATE jobs
+        SET favorite = ?
+        WHERE id = ?
+        """,
+        (1 if value else 0, job_id),
+    )
+
+    conn.commit()
+    conn.close()
+
+
+def toggle_favorite(job_id: int):
+    """
+    Toggle favorite status.
+    """
+
+    conn = get_connection()
+
+    cursor = conn.cursor()
+
+    cursor.execute(
+        """
+        SELECT favorite
+        FROM jobs
+        WHERE id = ?
+        """,
+        (job_id,),
+    )
+
+    row = cursor.fetchone()
+
+    if row is None:
+        conn.close()
+        return
+
+    new_value = 0 if row[0] else 1
+
+    cursor.execute(
+        """
+        UPDATE jobs
+        SET favorite = ?
+        WHERE id = ?
+        """,
+        (new_value, job_id),
+    )
+
+    conn.commit()
+    conn.close()
+
+
+def get_favorites() -> pd.DataFrame:
+    """
+    Return favorite jobs only.
+    """
+
+    conn = get_connection()
+
+    try:
+
+        df = pd.read_sql_query(
+            """
+            SELECT *
+            FROM jobs
+            WHERE favorite = 1
+            ORDER BY
+                score DESC,
+                resume_match DESC
             """,
             conn,
         )
@@ -70,6 +160,7 @@ def get_statistics(df: pd.DataFrame):
 
         return {
             "total_jobs": 0,
+            "favorite_jobs": 0,
             "average_score": 0,
             "average_resume_match": 0,
             "top_matches": 0,
@@ -86,9 +177,15 @@ def get_statistics(df: pd.DataFrame):
         df[df["score"] >= 100]
     )
 
+    favorite_jobs = len(
+        df[df["favorite"] == 1]
+    )
+
     return {
 
         "total_jobs": len(df),
+
+        "favorite_jobs": favorite_jobs,
 
         "average_score": average_score,
 

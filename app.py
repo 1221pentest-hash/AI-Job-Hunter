@@ -77,7 +77,9 @@ def main():
     for job in classified_jobs:
         matched_jobs.append(match_job(job))
 
-    print(f"Resume Matched Jobs: {len(matched_jobs)}")
+    print("\n===== SAMPLE JOB =====")
+    print(classified_jobs[0])
+    print("======================\n")
 
     # ----------------------------------------
     # Score Jobs
